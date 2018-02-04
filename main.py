@@ -2,20 +2,27 @@ import cv2
 import numpy as np
 import os
 import functions
-import pid
 from pprint import pprint
+from picamera.array import PiRGBArray
+from picamera import PiCamera
 
 def main():
 
-    capWebcam = cv2.VideoCapture("files/video_2.mp4")
+    #capWebcam = cv2.VideoCapture("files/video_2.mp4")
+    capWebcam = PiCamera()
+    camera.resolution = (1200, 480)
+    camera.framerate = 32
+    rawCapture = PiRGBArray(camera, size=(900,480))
 
     if capWebcam.isOpened() == False:
 
         os.system("pause")
         return
 
-    while cv2.waitKey(1) != 27 and capWebcam.isOpened():
-        blnFrameReadSuccessfully, imgOriginal = capWebcam.read()
+    for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=True):
+    #while cv2.waitKey(1) != 27 and capWebcam.isOpened():
+        #blnFrameReadSuccessfully, imgOriginal = capWebcam.read()
+         blnFrameReadSuccessfully, imgOriginal = frame.array
 
         if not blnFrameReadSuccessfully or imgOriginal is None:
             os.system("pause")
@@ -82,6 +89,7 @@ def main():
 
         pprint("Need to control - " + str(needToControl))
         pprint("Etalon value - " + str(etalonValue))
+
 
         cv2.line(newImage, (cX1, cY1 - 10), (cX1, cY1 + 10), (0, 255, 0), 2)
         cv2.line(newImage, (cX1 - 10, cY1), (cX1 + 10, cY1), (0, 255, 0), 2)

@@ -3,9 +3,9 @@ import gpio as GPIO
 class Car:
 
     servoPin = 11
-    IN3 = 5
-    IN4 = 4
-    ENB = 3
+    IN3 = 29
+    IN4 = 31
+    ENB = 13
 
     def __init__(self):
         ''' initialization of pins '''
