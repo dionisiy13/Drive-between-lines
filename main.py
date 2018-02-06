@@ -5,44 +5,49 @@ import functions
 from pprint import pprint
 from picamera.array import PiRGBArray
 from picamera import PiCamera
+import time
 
 def main():
 
+
     #capWebcam = cv2.VideoCapture("files/video_2.mp4")
-    capWebcam = PiCamera()
-    camera.resolution = (1200, 480)
+    camera = PiCamera()
+    camera.resolution = (800, 200)
     camera.framerate = 32
-    rawCapture = PiRGBArray(camera, size=(900,480))
+    rawCapture = PiRGBArray(camera, size=(800,200))
 
-    if capWebcam.isOpened() == False:
-
-        os.system("pause")
-        return
+    time.sleep(0.1)
 
     for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=True):
-    #while cv2.waitKey(1) != 27 and capWebcam.isOpened():
+    #while cv2.waitKey(1) != 27 and capWebcam.sOpened():
         #blnFrameReadSuccessfully, imgOriginal = capWebcam.read()
-         blnFrameReadSuccessfully, imgOriginal = frame.array
+        imgOriginal = frame.array 
+	lab= cv2.cvtColor(imgOriginal, cv2.COLOR_BGR2LAB)
 
-        if not blnFrameReadSuccessfully or imgOriginal is None:
-            os.system("pause")
-            break
-
-        # crop the useful part of image
+	
+	l, a, b = cv2.split(lab)
+	clahe = cv2.createCLAHE(clipLimit=4.0, tileGridSize=(8,8))
+	cl = clahe.apply(l)
+	limg = cv2.merge((cl,a,b))
+	imgOriginal = cv2.cvtColor(limg, cv2.COLOR_LAB2BGR)
+	
+	#print('fuck')
+	#print("\n")                                                                                                              
+	
         image = imgOriginal
-        (h, w) = image.shape[:2]
-        (cX, cY) = (w // 2, h // 2)
-        x = int(cX / 2)
-        y = int(cY / 2)
+        #(h, w) = image.shape[:2]
+        #(cX, cY) = (w // 2, h // 2)
+        #x = int(cX / 2)
+        #y = int(cY / 2)
 
-        newImage = image[y:cY + y, x:cX + x]
-
-        (h1, w1) = newImage.shape[:2]
+        #newImage = image[y:cY + y, x:cX + x]
+	newImage = image
+        (h1, w1) = image.shape[:2]
         (cX1, cY1) = (w1 // 2, h1 // 2)
-
+        
         # make img more readable for openCV
         gray = cv2.cvtColor(newImage, cv2.COLOR_BGR2GRAY)
-
+        
         # settings for detect lines
         kernel_size = 5
         blur_gray = cv2.GaussianBlur(gray, (kernel_size, kernel_size), 0)
@@ -52,15 +57,15 @@ def main():
         rho = 1  # distance resolution in pixels of the Hough grid
         theta = np.pi / 90  # angular resolution in radians of the Hough grid
         threshold = 15  # minimum number of votes (intersections in Hough grid cell)
-        min_line_length = 50  # minimum number of pixels making up a line
-        max_line_gap = 20  # maximum gap in pixels between connectable line segments
+        min_line_length = 60  # minimum number of pixels making up a line
+        max_line_gap = 15  # maximum gap in pixels between connectable line segments
         line_image = np.copy(newImage) * 0  # creating a blank to draw lines on
-
+	lines = []
         # Run Hough on edge detected image
         # Output "lines" is an array containing endpoints of detected line segments
         lines = cv2.HoughLinesP(edges, rho, theta, threshold, np.array([]),
                                 min_line_length, max_line_gap)
-
+		
         arrayLines = []
         for line in lines:
             for x1, y1, x2, y2 in line:
@@ -98,9 +103,11 @@ def main():
             cv2.line(line_image, (item[0], item[1]), (item[2], item[3]), (0, 0, 255), 1)
 
         lines_edges = cv2.addWeighted(newImage, 0.8, line_image, 1, 0)
-
+	
         cv2.imshow("lines", line_image)
-        cv2.imshow("original", newImage)
+        cv2.imshow("original", imgOriginal)
+	key = cv2.waitKey(1) & 0xFF
+	rawCapture.truncate(0)
 
     cv2.destroyAllWindows()
     return
