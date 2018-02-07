@@ -1,3 +1,5 @@
+import time
+import serial
 
 def eachPixelOfLine(line,centerY):
     xStart = line[2] if line[0] > line[2] else line[0]

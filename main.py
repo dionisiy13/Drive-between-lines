@@ -1,15 +1,13 @@
 import cv2
 import numpy as np
 import os
-import time
-import serial
 import functions
 from pprint import pprint
 from picamera.array import PiRGBArray
 from picamera import PiCamera
 
 
-
+time.sleep(1)
 def main():
 
     #capWebcam = cv2.VideoCapture("files/video_2.mp4")
@@ -17,8 +15,6 @@ def main():
     camera.resolution = (800, 200)
     camera.framerate = 32
     rawCapture = PiRGBArray(camera, size=(800,200))
-
-    time.sleep(0.1)
 
     for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=True):
     #while cv2.waitKey(1) != 27 and capWebcam.sOpened():
@@ -105,9 +101,9 @@ def main():
         cv2.imshow("original", imgOriginal)
         key = cv2.waitKey(1) & 0xFF
         rawCapture.truncate(0)
-        cv2.destroyAllWindows()
-
     return
+
+cv2.destroyAllWindows()
 
 if __name__ == "__main__":
     main()
