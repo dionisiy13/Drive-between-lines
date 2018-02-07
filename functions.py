@@ -93,8 +93,10 @@ def kalman(val):
     Xe = G*(val-Zp)+Xp
     return int(Xe)
 
+
+ser = serial.Serial("/dev/ttyUSB0", 9600)
 def transferToArduino(number):
-    ser = serial.Serial("/dev/ttyUSB0", 9600)
+    global ser
     if (ser):
         ser.flush()
         ser.write(number)
