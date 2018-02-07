@@ -1,12 +1,14 @@
 import cv2
 import numpy as np
 import os
+import time
+import serial
 import functions
 from pprint import pprint
 from picamera.array import PiRGBArray
 from picamera import PiCamera
-import time
-import serial
+
+
 
 def main():
 
