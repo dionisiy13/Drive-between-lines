@@ -95,8 +95,11 @@ def kalman(val):
 
 def transferToArduino(number):
     ser = serial.Serial("/dev/ttyUSB0", 9600)
-    ser.flush()
-    ser.write(number)
-    ser.write("\n")
-    ser.flush()
-    time.sleep(0.1)
+    if (ser):
+        ser.flush()
+        ser.write(number)
+        ser.write("\n")
+        ser.flush()
+        time.sleep(0.1)
+    else:
+        print("No available arduino")
