@@ -24,7 +24,7 @@ def main():
         imgOriginal = frame.array
 
         # make the frame more bright
-	    lab= cv2.cvtColor(imgOriginal, cv2.COLOR_BGR2LAB)
+        lab = cv2.cvtColor(imgOriginal, cv2.COLOR_BGR2LAB)
         l, a, b = cv2.split(lab)
         clahe = cv2.createCLAHE(clipLimit=4.0, tileGridSize=(8,8))
         cl = clahe.apply(l)
