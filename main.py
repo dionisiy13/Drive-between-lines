@@ -6,9 +6,9 @@ from pprint import pprint
 from picamera.array import PiRGBArray
 from picamera import PiCamera
 import time
+import serial
 
 def main():
-
 
     #capWebcam = cv2.VideoCapture("files/video_2.mp4")
     camera = PiCamera()
@@ -21,33 +21,25 @@ def main():
     for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=True):
     #while cv2.waitKey(1) != 27 and capWebcam.sOpened():
         #blnFrameReadSuccessfully, imgOriginal = capWebcam.read()
-        imgOriginal = frame.array 
-	lab= cv2.cvtColor(imgOriginal, cv2.COLOR_BGR2LAB)
+        imgOriginal = frame.array
 
-	
-	l, a, b = cv2.split(lab)
-	clahe = cv2.createCLAHE(clipLimit=4.0, tileGridSize=(8,8))
-	cl = clahe.apply(l)
-	limg = cv2.merge((cl,a,b))
-	imgOriginal = cv2.cvtColor(limg, cv2.COLOR_LAB2BGR)
-	
-	#print('fuck')
-	#print("\n")                                                                                                              
-	
+        # make the frame more bright
+	    lab= cv2.cvtColor(imgOriginal, cv2.COLOR_BGR2LAB)
+        l, a, b = cv2.split(lab)
+        clahe = cv2.createCLAHE(clipLimit=4.0, tileGridSize=(8,8))
+        cl = clahe.apply(l)
+        limg = cv2.merge((cl,a,b))
+        imgOriginal = cv2.cvtColor(limg, cv2.COLOR_LAB2BGR)
+
+
         image = imgOriginal
-        #(h, w) = image.shape[:2]
-        #(cX, cY) = (w // 2, h // 2)
-        #x = int(cX / 2)
-        #y = int(cY / 2)
-
-        #newImage = image[y:cY + y, x:cX + x]
-	newImage = image
+	    newImage = image
         (h1, w1) = image.shape[:2]
         (cX1, cY1) = (w1 // 2, h1 // 2)
         
         # make img more readable for openCV
         gray = cv2.cvtColor(newImage, cv2.COLOR_BGR2GRAY)
-        
+
         # settings for detect lines
         kernel_size = 5
         blur_gray = cv2.GaussianBlur(gray, (kernel_size, kernel_size), 0)
@@ -60,7 +52,7 @@ def main():
         min_line_length = 60  # minimum number of pixels making up a line
         max_line_gap = 15  # maximum gap in pixels between connectable line segments
         line_image = np.copy(newImage) * 0  # creating a blank to draw lines on
-	lines = []
+	    lines = []
         # Run Hough on edge detected image
         # Output "lines" is an array containing endpoints of detected line segments
         lines = cv2.HoughLinesP(edges, rho, theta, threshold, np.array([]),
@@ -87,6 +79,7 @@ def main():
         centerControl = int((nearLines[1] - nearLines[0]) / 2) + nearLines[0]
         centerControl = [functions.kalman(centerControl), nearLines[2]]
 
+        # for control
         etalonValue = centerControl[0]
 
         cv2.line(line_image, (centerControl[0], centerControl[1] - 10), (centerControl[0],centerControl[1] + 10), (255, 255, 255), 2)
@@ -95,6 +88,8 @@ def main():
         pprint("Need to control - " + str(needToControl))
         pprint("Etalon value - " + str(etalonValue))
 
+        # send to arduino
+        functions.transferToArduino(etalonValue)
 
         cv2.line(newImage, (cX1, cY1 - 10), (cX1, cY1 + 10), (0, 255, 0), 2)
         cv2.line(newImage, (cX1 - 10, cY1), (cX1 + 10, cY1), (0, 255, 0), 2)
@@ -103,13 +98,13 @@ def main():
             cv2.line(line_image, (item[0], item[1]), (item[2], item[3]), (0, 0, 255), 1)
 
         lines_edges = cv2.addWeighted(newImage, 0.8, line_image, 1, 0)
-	
+
         cv2.imshow("lines", line_image)
         cv2.imshow("original", imgOriginal)
-	key = cv2.waitKey(1) & 0xFF
-	rawCapture.truncate(0)
+	    key = cv2.waitKey(1) & 0xFF
+	    rawCapture.truncate(0)
+        cv2.destroyAllWindows()
 
-    cv2.destroyAllWindows()
     return
 
 if __name__ == "__main__":
