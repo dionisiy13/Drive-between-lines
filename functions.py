@@ -99,7 +99,7 @@ def transferToArduino(number):
     ser = serial.Serial("/dev/ttyUSB0", 9600)
     if (ser):
         ser.flush()
-        ser.write(number)
+        ser.write(str(number))
         ser.write("\n")
         ser.flush()
         time.sleep(0.1)
