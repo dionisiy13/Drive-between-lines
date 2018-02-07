@@ -33,7 +33,7 @@ def main():
 
 
         image = imgOriginal
-	    newImage = image
+        newImage = image
         (h1, w1) = image.shape[:2]
         (cX1, cY1) = (w1 // 2, h1 // 2)
         
@@ -52,7 +52,7 @@ def main():
         min_line_length = 60  # minimum number of pixels making up a line
         max_line_gap = 15  # maximum gap in pixels between connectable line segments
         line_image = np.copy(newImage) * 0  # creating a blank to draw lines on
-	    lines = []
+        lines = []
         # Run Hough on edge detected image
         # Output "lines" is an array containing endpoints of detected line segments
         lines = cv2.HoughLinesP(edges, rho, theta, threshold, np.array([]),
@@ -101,8 +101,8 @@ def main():
 
         cv2.imshow("lines", line_image)
         cv2.imshow("original", imgOriginal)
-	    key = cv2.waitKey(1) & 0xFF
-	    rawCapture.truncate(0)
+        key = cv2.waitKey(1) & 0xFF
+        rawCapture.truncate(0)
         cv2.destroyAllWindows()
 
     return
