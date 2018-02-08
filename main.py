@@ -61,6 +61,8 @@ def main():
         for line in lines:
             for x1, y1, x2, y2 in line:
                 arrayLines.append([x1,y1,x2,y2])
+
+
         # search the near lines from the center
         nearLines = functions.getTheNearestLine(arrayLines, cX1, cY1, line_image)
 
