@@ -67,8 +67,14 @@ def main():
         nearLines = functions.getTheNearestLine(arrayLines, cX1, cY1, line_image)
 
         # draw that lines
-        cv2.line(line_image, (nearLines[0], nearLines[2]), (nearLines[1], nearLines[2]), (0, 255, 0), 1)
-        cv2.line(newImage, (nearLines[0], nearLines[2]), (nearLines[1], nearLines[2]), (0, 255, 0), 1)
+        cv2.line(line_image,
+                 (nearLines[0], nearLines[2]),
+                 (nearLines[1], nearLines[2]),
+                 (0, 255, 0), 1)
+        cv2.line(newImage,
+                 (nearLines[0], nearLines[2]),
+                 (nearLines[1], nearLines[2]),
+                 (0, 255, 0), 1)
 
         # center
         cv2.line(line_image, (cX1, cY1-10), (cX1, cY1+10), (0, 255, 0), 2)
@@ -83,8 +89,14 @@ def main():
         # for control
         etalonValue = centerControl[0]
 
-        cv2.line(line_image, (centerControl[0], centerControl[1] - 10), (centerControl[0],centerControl[1] + 10), (255, 255, 255), 2)
-        cv2.line(line_image, (centerControl[0] - 10, centerControl[1]), (centerControl[0] + 10, centerControl[1]), (255, 255, 255), 2)
+        cv2.line(line_image,
+                 (centerControl[0], centerControl[1] - 10),
+                 (centerControl[0],centerControl[1] + 10),
+                 (255, 255, 255), 2)
+        cv2.line(line_image,
+                 (centerControl[0] - 10, centerControl[1]),
+                 (centerControl[0] + 10, centerControl[1]),
+                 (255, 255, 255), 2)
 
         pprint("Need to control - " + str(needToControl))
         pprint("Etalon value - " + str(etalonValue))
