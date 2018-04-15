@@ -188,7 +188,6 @@ def main():
         cv2.imshow("binar mask", binary_mask)
 
         cv2.imshow("original", lines_edges)
-        cv2.waitKey()
         i = 1
         if cv2.waitKey(1) & 0xFF == ord('q'):
             break
