@@ -59,9 +59,9 @@ def main():
     #while cv2.waitKey(1) != 27 and capWebcam.isOpened():
 
     camera = PiCamera()
-    camera.resolution = (800, 200)
+    camera.resolution = (800, 208)
     camera.framerate = 32
-    rawCapture = PiRGBArray(camera, size=(800,200))
+    rawCapture = PiRGBArray(camera, size=(800,208))
 
     for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=True):
 
