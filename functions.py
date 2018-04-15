@@ -1,5 +1,5 @@
 import time
-import serial
+#import serial
 
 def eachPixelOfLine(line,centerY):
     xStart = line[2] if line[0] > line[2] else line[0]
@@ -23,8 +23,8 @@ def eachPixelOfLine(line,centerY):
 
         for x in xPixels[1:]:
             yAcc = yAcc + step
-            #if (int(round(yAcc)) == centerY):
-            #yield [x, int(round(yAcc))]
+            if (int(round(yAcc)) == centerY):
+                yield [x, int(round(yAcc))]
 
     else:
         yPixels = range(yStart,yEnd)
@@ -56,7 +56,10 @@ def getTheNearestLine(lines, centerX, centerY, img):
 
             x = linePixel[0]
             y = linePixel[1]
-
+            print("X: ")
+            print(x)
+            print("center:")
+            print(centerX)
             if (y != centerY):
                 continue
             if (x > centerX):
@@ -68,40 +71,16 @@ def getTheNearestLine(lines, centerX, centerY, img):
 
     return [nearestLeftX, nearestRigthX, centerY]
 
-# kalman settings
-varVolt = 49
-varProcess = 0.5
-Pc = 0.0
-G = 0.0
-P = 1.0
-Xp = 0.0
-Zp = 0.0
-Xe = 0.0
 
-def kalman(val):
-    global P
-    global varProcess
-    global Xe
-    global Xp
-    global Zp
-    global G
-    global Pc
-    global varVolt
-    Pc = P + varProcess
-    G = Pc/(Pc + varVolt)
-    P = (1 - G)*Pc
-    Xp = Xe
-    Zp = Xp
-    Xe = G*(val-Zp)+Xp
-    return int(Xe)
 
 def transferToArduino(number):
-    ser = serial.Serial("/dev/ttyUSB0", 9600)
-    if (ser):
-        ser.flush()
-        ser.write(str(number))
-        ser.write("\n")
-        ser.flush()
-        time.sleep(0.1)
-    else:
-        print("No available arduino")
+    return True
+    # ser = serial.Serial("/dev/ttyUSB0", 9600)
+    # if (ser):
+    #     ser.flush()
+    #     ser.write(str(number))
+    #     ser.write("\n")
+    #     ser.flush()
+    #     time.sleep(0.1)
+    # else:
+    #     print("No available arduino")
