@@ -66,7 +66,7 @@ def main():
     for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=True):
 
         #blnFrameReadSuccessfully, imgOriginal = capWebcam.read()
-        blnFrameReadSuccessfully, imgOriginal = frame.array
+        imgOriginal = frame.array
 
 
         # make the frame more bright
