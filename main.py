@@ -185,9 +185,9 @@ def main():
         lines_edges = cv2.addWeighted(newImage, 0.8, line_image, 1, 0)
 
 
-        #cv2.imshow("binar mask", binary_mask)
+        cv2.imshow("binar mask", binary_mask)
 
-        cv2.imshow("original", lines_edges)
+        #cv2.imshow("original", lines_edges)
 
         rawCapture.truncate()
         rawCapture.seek(0)
