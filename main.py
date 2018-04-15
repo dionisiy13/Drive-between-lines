@@ -61,6 +61,7 @@ def main():
     camera = PiCamera()
     camera.resolution = (800, 208)
     camera.framerate = 32
+    camera.brightness = 100
     rawCapture = PiRGBArray(camera, size=(800,208))
 
     for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=True):
