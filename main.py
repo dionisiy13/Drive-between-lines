@@ -80,6 +80,8 @@ def main():
         imgOriginal = imutils.resize(frame, (800,208))
 
         cv2.imshow("Frame", imgOriginal)
+        '''
+        
         # make the frame more bright
         lab = cv2.cvtColor(imgOriginal, cv2.COLOR_BGR2LAB)
         l, a, b = cv2.split(lab)
@@ -194,7 +196,7 @@ def main():
 
         #rawCapture.truncate()
         #rawCapture.seek(0)
-
+        '''
         i = 1
         if cv2.waitKey(1) & 0xFF == ord('q'):
             break
