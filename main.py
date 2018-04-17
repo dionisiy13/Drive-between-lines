@@ -3,7 +3,7 @@ import numpy as np
 import os
 import time
 from functions import *
-from PiVideoStream import *
+from imutils.video.pivideostream import PiVideoStream
 import imutils
 from pprint import pprint
 from picamera.array import PiRGBArray
