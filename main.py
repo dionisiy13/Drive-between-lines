@@ -198,6 +198,7 @@ def main():
         i = 1
         if cv2.waitKey(1) & 0xFF == ord('q'):
             break
+    camera.stop()
     return
 
 cv2.destroyAllWindows()
