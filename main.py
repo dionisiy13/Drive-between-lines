@@ -61,7 +61,7 @@ def main():
     camera = PiCamera()
     camera.resolution = (800, 208)
     camera.framerate = 32
-    camera.brightness = 100
+    camera.brightness = 63
     rawCapture = PiRGBArray(camera, size=(800,208))
 
     for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=True):
@@ -124,9 +124,12 @@ def main():
         lines = []
         # Run Hough on edge detected image
         # Output "lines" is an array containing endpoints of detected line segments
-        lines = cv2.HoughLinesP(edges, rho, theta, threshold, np.array([]),
-                                min_line_length, max_line_gap)
-		
+        lines = cv2.HoughLinesP(edges, rho, theta, threshold, np.array([]),min_line_length, max_line_gap)
+
+        if not lines:
+            print("Fuck, sorry my lord, but I did not found any line( But I am trying........")
+            continue
+
         arrayLines = []
         for line in lines:
             for x1, y1, x2, y2 in line:

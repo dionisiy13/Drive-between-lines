@@ -1,5 +1,5 @@
 import time
-#import serial
+import serial
 
 def eachPixelOfLine(line,centerY):
     xStart = line[2] if line[0] > line[2] else line[0]
@@ -74,13 +74,14 @@ def getTheNearestLine(lines, centerX, centerY, img):
 
 
 def transferToArduino(number):
-    return True
-    # ser = serial.Serial("/dev/ttyUSB0", 9600)
-    # if (ser):
-    #     ser.flush()
-    #     ser.write(str(number))
-    #     ser.write("\n")
-    #     ser.flush()
-    #     time.sleep(0.1)
-    # else:
-    #     print("No available arduino")
+    try:
+        ser = serial.Serial("/dev/ttyUSB0", 9600)
+        ser.flush()
+        ser.write(str(number))
+        ser.write("\n")
+        ser.flush()
+        time.sleep(0.1)
+        return True
+    except:
+        print("No available arduino")
+        return True
