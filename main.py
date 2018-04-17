@@ -202,7 +202,7 @@ def main():
     return
 
 cv2.destroyAllWindows()
-camera.stop()
+
 
 
 if __name__ == "__main__":
