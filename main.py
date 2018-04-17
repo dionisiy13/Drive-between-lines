@@ -128,6 +128,8 @@ def main():
 
         if lines is None:
             print("Fuck, sorry my lord, but I did not found any line( But I am trying........")
+            rawCapture.truncate()
+            rawCapture.seek(0)
             continue
 
         arrayLines = []
