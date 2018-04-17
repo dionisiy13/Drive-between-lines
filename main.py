@@ -76,8 +76,8 @@ def main():
         #blnFrameReadSuccessfully, imgOriginal = capWebcam.read()
         # imgOriginal = frame.array
 
-        frame = camera.read()
-        imgOriginal = imutils.resize(frame, width=400)
+        imgOriginal = camera.read()
+        #imgOriginal = imutils.resize(frame, width=400)
 
         cv2.imshow("Frame", imgOriginal)
 
