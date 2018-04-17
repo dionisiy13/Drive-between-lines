@@ -80,7 +80,7 @@ def main():
         imgOriginal = imutils.resize(frame, width=400)
 
         cv2.imshow("Frame", imgOriginal)
-        '''
+
         
         # make the frame more bright
         lab = cv2.cvtColor(imgOriginal, cv2.COLOR_BGR2LAB)
@@ -93,8 +93,9 @@ def main():
 
         image = imgOriginal
         newImage = image
-        (h1, w1) = image.shape[:2]
-        (cX1, cY1) = (w1 // 2, h1 // 2)
+        (h1, w1) = (208, 800)
+        #(cX1, cY1) = (w1 // 2, h1 // 2)
+        (cX1, cY1) = (400, 104)
 
 
         gray = cv2.cvtColor(newImage, cv2.COLOR_BGR2GRAY)
@@ -127,8 +128,6 @@ def main():
 
         if lines is None:
             print("Fuck, sorry my lord, but I did not found any line( But I am trying........")
-            rawCapture.truncate()
-            rawCapture.seek(0)
             continue
 
         arrayLines = []
@@ -196,7 +195,7 @@ def main():
 
         #rawCapture.truncate()
         #rawCapture.seek(0)
-        '''
+
         i = 1
         if cv2.waitKey(1) & 0xFF == ord('q'):
             break
