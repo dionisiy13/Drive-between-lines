@@ -3,6 +3,8 @@ import numpy as np
 import os
 import time
 from functions import *
+from PiVideoStream import *
+import imutils
 from pprint import pprint
 from picamera.array import PiRGBArray
 from picamera import PiCamera
@@ -47,27 +49,35 @@ def draw_binary_mask(binary_mask, img):
 
 def main():
     global Xe
-    pprint(cv2.__version__);
 
-    '''capWebcam = cv2.VideoCapture("files/video4.mp4")
 
-    if capWebcam.isOpened() == False:
-        os.system("pause")
-        return
-    '''
     i = 0
     #while cv2.waitKey(1) != 27 and capWebcam.isOpened():
 
+    '''capWebcam = cv2.VideoCapture("files/video4.mp4")
+
+        if capWebcam.isOpened() == False:
+            os.system("pause")
+            return
+        '''
+    '''
     camera = PiCamera()
     camera.resolution = (800, 208)
     camera.framerate = 32
     camera.brightness = 63
     rawCapture = PiRGBArray(camera, size=(800,208))
+    '''
+    camera = PiVideoStream().start()
 
-    for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=True):
+
+    #for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=True):
+    while 1:
 
         #blnFrameReadSuccessfully, imgOriginal = capWebcam.read()
-        imgOriginal = frame.array
+        # imgOriginal = frame.array
+
+        frame = camera.read()
+        imgOriginal = imutils.resize(frame, (800,208))
 
 
         # make the frame more bright
@@ -88,26 +98,13 @@ def main():
         gray = cv2.cvtColor(newImage, cv2.COLOR_BGR2GRAY)
 
 
-
-        # settings for detect lines
-        kernel_size = 5
-        #blur_gray = cv2.GaussianBlur(gray, (kernel_size, kernel_size), 0)
-
-
-
         blank_image = np.zeros_like(newImage)
         hsv_image = cv2.cvtColor(imgOriginal, cv2.COLOR_RGB2HSV)
 
         hsv_min =  np.array([5,60,60])
         hsv_max = np.array([80,255,255])
         binary_mask = cv2.inRange(hsv_image, hsv_min, hsv_max)
-
-
         masked_image = draw_binary_mask(binary_mask, hsv_image)
-       ## edges_mask = cv2.Canny(masked_image, 280, 360)
-
-        #cv2.imshow("original", masked_image)
-        #cv2.waitKey()  # make img more readable for openCV
 
 
         low_threshold = 50
@@ -195,8 +192,8 @@ def main():
 
         cv2.imshow("original", lines_edges)
 
-        rawCapture.truncate()
-        rawCapture.seek(0)
+        #rawCapture.truncate()
+        #rawCapture.seek(0)
 
         i = 1
         if cv2.waitKey(1) & 0xFF == ord('q'):
@@ -204,6 +201,7 @@ def main():
     return
 
 cv2.destroyAllWindows()
+camera.stop()
 
 
 if __name__ == "__main__":
