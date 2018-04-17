@@ -126,7 +126,7 @@ def main():
         # Output "lines" is an array containing endpoints of detected line segments
         lines = cv2.HoughLinesP(edges, rho, theta, threshold, np.array([]),min_line_length, max_line_gap)
 
-        if not lines.size:
+        if lines is None:
             print("Fuck, sorry my lord, but I did not found any line( But I am trying........")
             continue
 
