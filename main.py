@@ -79,9 +79,6 @@ def main():
 
         imgOriginal = camera.read()
         imgOriginal = imutils.resize(imgOriginal, 500, 300)
-
-        cv2.imshow("Frame", imgOriginal)
-
         
         # make the frame more bright
         lab = cv2.cvtColor(imgOriginal, cv2.COLOR_BGR2LAB)
@@ -175,7 +172,7 @@ def main():
 
         # send to arduino
         transferToArduino(etalonValue)
-
+        print(etalonValue)
         cv2.line(newImage, (cX1, cY1 - 10), (cX1, cY1 + 10), (0, 255, 0), 2)
         cv2.line(newImage, (cX1 - 10, cY1), (cX1 + 10, cY1), (0, 255, 0), 2)
 
@@ -187,7 +184,7 @@ def main():
 
         #cv2.imshow("binar mask", binary_mask)
 
-        cv2.imshow("original", lines_edges)
+        #cv2.imshow("original", lines_edges)
 
         #rawCapture.truncate()
         #rawCapture.seek(0)
