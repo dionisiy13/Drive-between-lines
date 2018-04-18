@@ -5,6 +5,7 @@ import time
 from functions import *
 from imutils.video.pivideostream import PiVideoStream
 import imutils
+import random
 from pprint import pprint
 from picamera.array import PiRGBArray
 from picamera import PiCamera
@@ -133,7 +134,7 @@ def main():
             for x1, y1, x2, y2 in line:
                 arrayLines.append([x1,y1,x2,y2])
 
-
+        print(random.randint(0,100))
 
         i = 1
         if cv2.waitKey(1) & 0xFF == ord('q'):
