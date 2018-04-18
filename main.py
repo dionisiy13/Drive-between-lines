@@ -78,7 +78,7 @@ def main():
         # imgOriginal = frame.array
 
         imgOriginal = camera.read()
-        imgOriginal = imutils.resize(imgOriginal, (500,300))
+        imgOriginal = imutils.resize(imgOriginal, 500, 300)
 
         cv2.imshow("Frame", imgOriginal)
 
