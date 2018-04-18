@@ -68,6 +68,7 @@ def main():
     rawCapture = PiRGBArray(camera, size=(800,208))
     '''
     camera = PiVideoStream().start()
+    time.sleep(4.0)
 
 
     #for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=True):
@@ -77,7 +78,7 @@ def main():
         # imgOriginal = frame.array
 
         imgOriginal = camera.read()
-        #imgOriginal = imutils.resize(frame, width=400)
+        imgOriginal = imutils.resize(imgOriginal, (500,300))
 
         cv2.imshow("Frame", imgOriginal)
 
@@ -93,9 +94,9 @@ def main():
 
         image = imgOriginal
         newImage = image
-        (h1, w1) = (208, 800)
+        (h1, w1) = (300, 500)
         #(cX1, cY1) = (w1 // 2, h1 // 2)
-        (cX1, cY1) = (400, 104)
+        (cX1, cY1) = (250, 150)
 
 
         gray = cv2.cvtColor(newImage, cv2.COLOR_BGR2GRAY)
@@ -144,10 +145,6 @@ def main():
                  (nearLines[0], nearLines[2]),
                  (nearLines[1], nearLines[2]),
                  (0, 255, 0), 1)
-        cv2.line(newImage,
-                 (nearLines[0], nearLines[2]),
-                 (nearLines[1], nearLines[2]),
-                 (0, 255, 0), 1)
 
         # center
         cv2.line(line_image, (cX1, cY1-10), (cX1, cY1+10), (0, 255, 0), 2)
@@ -184,7 +181,6 @@ def main():
 
         for item in arrayLines:
             cv2.line(line_image, (item[0], item[1]), (item[2], item[3]), (0, 0, 255), 1)
-            cv2.line(binary_mask, (item[0], item[1]), (item[2], item[3]), (0, 0, 255), 1)
 
         lines_edges = cv2.addWeighted(newImage, 0.8, line_image, 1, 0)
 
