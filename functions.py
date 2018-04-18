@@ -80,7 +80,7 @@ def transferToArduino(number):
         ser.write(str(number))
         ser.write("\n")
         ser.flush()
-        time.sleep(0.1)
+        time.sleep(0.01)
         return True
     except:
         print("No available arduino")
