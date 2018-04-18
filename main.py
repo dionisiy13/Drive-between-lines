@@ -117,7 +117,7 @@ def main():
         rho = 1  # distance resolution in pixels of the Hough grid
         theta = np.pi / 90  # angular resolution in radians of the Hough grid
         threshold = 15  # minimum number of votes (intersections in Hough grid cell)
-        min_line_length = 40  # minimum number of pixels making up a line
+        min_line_length = 20  # minimum number of pixels making up a line
         max_line_gap = 15  # maximum gap in pixels between connectable line segments
         line_image = np.copy(newImage) * 0  # creating a blank to draw lines on
         lines = []
@@ -129,10 +129,7 @@ def main():
             print("Fuck, sorry my lord, but I did not found any line( But I am trying........")
             continue
 
-        arrayLines = []
-        for line in lines:
-            for x1, y1, x2, y2 in line:
-                arrayLines.append([x1,y1,x2,y2])
+        
 
         print(random.randint(0,100))
 
