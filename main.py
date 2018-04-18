@@ -109,7 +109,7 @@ def main():
         masked_image = draw_binary_mask(binary_mask, hsv_image)
 
 
-        low_threshold = 50
+        low_threshold = 100
         high_threshold = 150
         edges = cv2.Canny(masked_image, low_threshold, high_threshold)
 
