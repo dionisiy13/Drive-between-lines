@@ -83,9 +83,8 @@ def main():
 
         image = imgOriginal
         newImage = image
-        (h1, w1) = (300, 500)
-        #(cX1, cY1) = (w1 // 2, h1 // 2)
-        (cX1, cY1) = (250, 150)
+        (h1, w1) = image.shape[:2]
+        (cX1, cY1) = (w1 // 2, h1 // 2)
 
 
         gray = cv2.cvtColor(newImage, cv2.COLOR_BGR2GRAY)
