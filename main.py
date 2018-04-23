@@ -1,5 +1,4 @@
 import cv2
-import RPi.GPIO as GPIO
 from RPIO import PWM
 import numpy as np
 import os
@@ -53,7 +52,6 @@ def draw_binary_mask(binary_mask, img):
 
 def updateAngle(angle):
     duty = 750+(angle * 9.7)
-    print(duty)
     servo.set_servo(17, duty)
 
 def main():
