@@ -53,6 +53,7 @@ def draw_binary_mask(binary_mask, img):
 
 def updateAngle(angle):
     duty = 750+(angle * 9.7)
+    print(duty)
     servo.set_servo(17, duty)
 
 def main():
