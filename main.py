@@ -1,4 +1,5 @@
 import cv2
+import RPi.GPIO as GPIO
 import numpy as np
 import os
 import time
@@ -10,14 +11,19 @@ from picamera.array import PiRGBArray
 from picamera import PiCamera
 
 # kalman settings
-varVolt = 80
-varProcess = 0.1
+varVolt = 10
+varProcess = 3
 Pc = 0.0
 G = 0.0
 P = 1.0
 Xp = 0.0
 Zp = 0.0
 Xe = 0
+
+GPIO.setmode(GPIO.BCM)
+GPIO.setup(18, GPIO.OUT)
+pwm = GPIO.PWM(18, 100)
+pwm.start(5)
 
 
 def kalman(val):
@@ -47,10 +53,14 @@ def draw_binary_mask(binary_mask, img):
         return masked_image
 
 
+def updateAngle(angle):
+    duty = float(angle) / 10.0 + 2.5
+    pwm.ChangeDutyCycle(duty)
+
 def main():
     global Xe
 
-
+    print("init..")
     i = 0
     #while cv2.waitKey(1) != 27 and capWebcam.isOpened():
 
@@ -67,10 +77,11 @@ def main():
     camera.brightness = 63
     rawCapture = PiRGBArray(camera, size=(800,208))
     '''
+    print("camera init..")
     camera = PiVideoStream().start()
     time.sleep(4.0)
 
-
+    print("start!")
     #for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=True):
     while 1:
 
@@ -162,8 +173,23 @@ def main():
         #pprint("Etalon value - " + str(etalonValue))
 
         # send to arduino
-        transferToArduino(etalonValue)
-        print(etalonValue)
+
+
+        error = etalonValue - 250
+        kp = (nearLines[1] - nearLines[0])/2
+        kp = float(30)/float(kp)
+        kp = float(kp) + 0.2
+        output = float(kp) * float(error)
+        output = output + 90
+        if (output > 120):
+            output = 120
+        if (output < 60):
+            output = 60
+        print(output)
+        updateAngle(int(output))
+
+        #transferToArduino(etalonValue)
+        #print(etalonValue)
         cv2.line(newImage, (cX1, cY1 - 10), (cX1, cY1 + 10), (0, 255, 0), 2)
         cv2.line(newImage, (cX1 - 10, cY1), (cX1 + 10, cY1), (0, 255, 0), 2)
 

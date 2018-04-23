@@ -56,10 +56,6 @@ def getTheNearestLine(lines, centerX, centerY, img):
 
             x = linePixel[0]
             y = linePixel[1]
-            print("X: ")
-            print(x)
-            print("center:")
-            print(centerX)
             if (y != centerY):
                 continue
             if (x > centerX):
@@ -74,6 +70,7 @@ def getTheNearestLine(lines, centerX, centerY, img):
 
 
 def transferToArduino(number):
+    return true
     try:
         ser = serial.Serial("/dev/ttyUSB0", 9600)
         ser.flush()
