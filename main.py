@@ -1,5 +1,6 @@
 import cv2
 import RPi.GPIO as GPIO
+from RPIO import PWM
 import numpy as np
 import os
 import time
@@ -20,11 +21,8 @@ Xp = 0.0
 Zp = 0.0
 Xe = 0
 
-GPIO.setmode(GPIO.BCM)
-GPIO.setup(18, GPIO.OUT)
-pwm = GPIO.PWM(18, 100)
-pwm.start(5)
-
+servo = PWM.Servo()
+servo.set_servo(17, 900)
 
 def kalman(val):
     global P
@@ -54,8 +52,8 @@ def draw_binary_mask(binary_mask, img):
 
 
 def updateAngle(angle):
-    duty = float(angle) / 10.0 + 2.5
-    pwm.ChangeDutyCycle(duty)
+    duty = 750+(angle * 9.7)
+    servo.set_servo(17, duty)
 
 def main():
     global Xe
