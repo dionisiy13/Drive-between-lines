@@ -1,5 +1,9 @@
 import time
 import serial
+import smbus
+
+bus = smbus.SMBus(1)
+address = 0x04
 
 def eachPixelOfLine(line,centerY):
     xStart = line[2] if line[0] > line[2] else line[0]
@@ -68,17 +72,21 @@ def getTheNearestLine(lines, centerX, centerY, img):
     return [nearestLeftX, nearestRigthX, centerY]
 
 
-
 def transferToArduino(number):
-    return true
-    try:
-        ser = serial.Serial("/dev/ttyUSB0", 9600)
-        ser.flush()
-        ser.write(str(number))
-        ser.write("\n")
-        ser.flush()
-        time.sleep(0.01)
-        return True
-    except:
-        print("No available arduino")
-        return True
+    bus.write_byte(address, value)
+
+
+
+# def transferToArduino(number):
+#     return true
+#     try:
+#         ser = serial.Serial("/dev/ttyUSB0", 9600)
+#         ser.flush()
+#         ser.write(str(number))
+#         ser.write("\n")
+#         ser.flush()
+#         time.sleep(0.01)
+#         return True
+#     except:
+#         print("No available arduino")
+#         return True

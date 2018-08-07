@@ -1,5 +1,4 @@
 import cv2
-import RPi.GPIO as GPIO
 import numpy as np
 import os
 import time
@@ -19,11 +18,6 @@ P = 1.0
 Xp = 0.0
 Zp = 0.0
 Xe = 0
-
-GPIO.setmode(GPIO.BCM)
-GPIO.setup(17, GPIO.OUT)
-pwm = GPIO.PWM(17, 50)
-pwm.start(5)
 
 
 def kalman(val):
@@ -52,10 +46,6 @@ def draw_binary_mask(binary_mask, img):
             masked_image[:,:,i] = binary_mask.copy()
         return masked_image
 
-
-def updateAngle(angle):
-    duty = float(angle) / 10.0 + 2.5
-    pwm.ChangeDutyCycle(duty)
 
 def main():
     global Xe
@@ -185,13 +175,14 @@ def main():
             output = 65
         if (output < 35):
             output = 35
-        output = (65 - output) + 35
-	print(output)
-	
-        updateAngle(int(output))
 
-        #transferToArduino(etalonValue)
-        #print(etalonValue)
+        output = (65 - output) + 35
+
+
+
+        transferToArduino(etalonValue)
+        print(etalonValue)
+
         cv2.line(newImage, (cX1, cY1 - 10), (cX1, cY1 + 10), (0, 255, 0), 2)
         cv2.line(newImage, (cX1 - 10, cY1), (cX1 + 10, cY1), (0, 255, 0), 2)
 
