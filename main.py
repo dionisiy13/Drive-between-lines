@@ -37,39 +37,28 @@ def kalman(val):
     Xe = G*(val-Zp)+Xp
     return int(Xe)
 
-
-def draw_binary_mask(binary_mask, img):
-        if len(binary_mask.shape) != 2:
-            raise Exception('binary_mask: not a 1-channel mask. Shape: {}'.format(str(binary_mask.shape)))
-        masked_image = np.zeros_like(img)
-        for i in range(3):
-            masked_image[:,:,i] = binary_mask.copy()
-        return masked_image
-
+def nothing(x):
+    pass
 
 def main():
     global Xe
 
     print("init..")
     i = 0
-    #while cv2.waitKey(1) != 27 and capWebcam.isOpened():
 
-    '''capWebcam = cv2.VideoCapture("files/video4.mp4")
-
-        if capWebcam.isOpened() == False:
-            os.system("pause")
-            return
-        '''
-    '''
-    camera = PiCamera()
-    camera.resolution = (800, 208)
-    camera.framerate = 32
-    camera.brightness = 63
-    rawCapture = PiRGBArray(camera, size=(800,208))
-    '''
     print("camera init..")
     camera = PiVideoStream().start()
     time.sleep(4.0)
+
+    cv2.namedWindow("TrackBars")
+
+    cv2.createTrackbar("L - H", "Trackbars", 0, 179, nothing)
+    cv2.createTrackbar("L - S", "Trackbars", 0, 255, nothing)
+    cv2.createTrackbar("L - V", "Trackbars", 0, 255, nothing)
+    cv2.createTrackbar("U - H", "Trackbars", 0, 179, nothing)
+    cv2.createTrackbar("U - S", "Trackbars", 0, 255, nothing)
+    cv2.createTrackbar("U - V", "Trackbars", 0, 255, nothing)
+
 
     print("start!")
     #for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=True):
@@ -83,26 +72,28 @@ def main():
 
 
         image = imgOriginal
-        newImage = image
         (h1, w1) = image.shape[:2]
         (cX1, cY1) = (w1 // 2, h1 // 2)
 
-
-        gray = cv2.cvtColor(newImage, cv2.COLOR_BGR2GRAY)
-
-
-        blank_image = np.zeros_like(newImage)
         hsv_image = cv2.cvtColor(imgOriginal, cv2.COLOR_RGB2HSV)
 
-        hsv_min =  np.array([5,60,60])
-        hsv_max = np.array([80,255,255])
+
+        l_h = cv2.getTrackbarPos("L - H", "Trackbars")
+        l_s = cv2.getTrackbarPos("L - S", "Trackbars")
+        l_v = cv2.getTrackbarPos("L - V", "Trackbars")
+        u_h = cv2.getTrackbarPos("U - H", "Trackbars")
+        u_s = cv2.getTrackbarPos("U - S", "Trackbars")
+        u_v = cv2.getTrackbarPos("U - V", "Trackbars")
+
+
+        hsv_min =  np.array([l_h,l_s,l_v])
+        hsv_max = np.array([u_h,u_s,u_v])
         binary_mask = cv2.inRange(hsv_image, hsv_min, hsv_max)
-        masked_image = draw_binary_mask(binary_mask, hsv_image)
 
 
         low_threshold = 50
         high_threshold = 150
-        edges = cv2.Canny(masked_image, low_threshold, high_threshold)
+        edges = cv2.Canny(binary_mask, low_threshold, high_threshold)
 
 
         rho = 1  # distance resolution in pixels of the Hough grid
@@ -110,7 +101,7 @@ def main():
         threshold = 15  # minimum number of votes (intersections in Hough grid cell)
         min_line_length = 20  # minimum number of pixels making up a line
         max_line_gap = 15  # maximum gap in pixels between connectable line segments
-        line_image = np.copy(newImage) * 0  # creating a blank to draw lines on
+        line_image = np.copy(image) * 0  # creating a blank to draw lines on
         lines = []
         # Run Hough on edge detected image
         # Output "lines" is an array containing endpoints of detected line segments
@@ -180,7 +171,7 @@ def main():
 
 
 
-        transferToArduino(int(output))
+        #transferToArduino(int(output))
         print(output)
 
         cv2.line(newImage, (cX1, cY1 - 10), (cX1, cY1 + 10), (0, 255, 0), 2)
