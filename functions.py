@@ -1,6 +1,6 @@
 import time
 import serial
-import smbus
+import smbus2 as smbus
 
 bus = smbus.SMBus(1)
 address = 0x04
@@ -73,7 +73,7 @@ def getTheNearestLine(lines, centerX, centerY, img):
 
 
 def transferToArduino(number):
-    bus.write_byte(address, value)
+    bus.write_byte(address, number)
 
 
 

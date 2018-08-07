@@ -180,8 +180,8 @@ def main():
 
 
 
-        transferToArduino(etalonValue)
-        print(etalonValue)
+        transferToArduino(output)
+        print(output)
 
         cv2.line(newImage, (cX1, cY1 - 10), (cX1, cY1 + 10), (0, 255, 0), 2)
         cv2.line(newImage, (cX1 - 10, cY1), (cX1 + 10, cY1), (0, 255, 0), 2)
