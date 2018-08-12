@@ -37,9 +37,6 @@ def kalman(val):
     Xe = G*(val-Zp)+Xp
     return int(Xe)
 
-def nothing(x):
-    pass
-
 def main():
     global Xe
 
@@ -49,15 +46,6 @@ def main():
     print("camera init..")
     camera = PiVideoStream().start()
     time.sleep(4.0)
-
-    cv2.namedWindow("TrackBars")
-
-    cv2.createTrackbar("L - H", "Trackbars", 0, 179, nothing)
-    cv2.createTrackbar("L - S", "Trackbars", 0, 255, nothing)
-    cv2.createTrackbar("L - V", "Trackbars", 0, 255, nothing)
-    cv2.createTrackbar("U - H", "Trackbars", 0, 179, nothing)
-    cv2.createTrackbar("U - S", "Trackbars", 0, 255, nothing)
-    cv2.createTrackbar("U - V", "Trackbars", 0, 255, nothing)
 
 
     print("start!")
@@ -78,16 +66,9 @@ def main():
         hsv_image = cv2.cvtColor(imgOriginal, cv2.COLOR_RGB2HSV)
 
 
-        l_h = cv2.getTrackbarPos("L - H", "Trackbars")
-        l_s = cv2.getTrackbarPos("L - S", "Trackbars")
-        l_v = cv2.getTrackbarPos("L - V", "Trackbars")
-        u_h = cv2.getTrackbarPos("U - H", "Trackbars")
-        u_s = cv2.getTrackbarPos("U - S", "Trackbars")
-        u_v = cv2.getTrackbarPos("U - V", "Trackbars")
 
-
-        hsv_min =  np.array([l_h,l_s,l_v])
-        hsv_max = np.array([u_h,u_s,u_v])
+        hsv_min =  np.array([47,174,64])
+        hsv_max = np.array([99,255,255])
         binary_mask = cv2.inRange(hsv_image, hsv_min, hsv_max)
 
 
@@ -171,16 +152,16 @@ def main():
 
 
 
-        #transferToArduino(int(output))
+        transferToArduino(int(output))
         print(output)
 
-        cv2.line(newImage, (cX1, cY1 - 10), (cX1, cY1 + 10), (0, 255, 0), 2)
-        cv2.line(newImage, (cX1 - 10, cY1), (cX1 + 10, cY1), (0, 255, 0), 2)
+        cv2.line(imgOriginal, (cX1, cY1 - 10), (cX1, cY1 + 10), (0, 255, 0), 2)
+        cv2.line(imgOriginal, (cX1 - 10, cY1), (cX1 + 10, cY1), (0, 255, 0), 2)
 
         for item in arrayLines:
             cv2.line(line_image, (item[0], item[1]), (item[2], item[3]), (0, 0, 255), 1)
 
-        lines_edges = cv2.addWeighted(newImage, 0.8, line_image, 1, 0)
+        lines_edges = cv2.addWeighted(imgOriginal, 0.8, line_image, 1, 0)
 
 
         cv2.imshow("binar mask", binary_mask)
