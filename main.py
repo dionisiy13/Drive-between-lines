@@ -70,7 +70,6 @@ def main():
         hsv_min =  np.array([54,118,84])
         hsv_max = np.array([99,255,255])
         binary_mask = cv2.inRange(hsv_image, hsv_min, hsv_max)
-	cv2.imshow("23233", binary_mask)
 
         low_threshold = 50
         high_threshold = 150
@@ -97,15 +96,38 @@ def main():
             for x1, y1, x2, y2 in line:
                 arrayLines.append([x1,y1,x2,y2])
 
-	cY1 += 30
+
         # search the near lines from the center
-        nearLines = getTheNearestLine(arrayLines, cX1, cY1, line_image)
+        nearLinesCenter = getTheNearestLine(arrayLines, cX1, cY1, line_image)
+        nearLinesTop = getTheNearestLine(arrayLines, cX1 - 10, cY1, line_image)
+        nearLinesBotton = getTheNearestLine(arrayLines, cX1 + 10, cY1, line_image)
+
+
 
         # draw that lines
         cv2.line(line_image,
-                 (nearLines[0], nearLines[2]),
-                (nearLines[1], nearLines[2]),
+                 (nearLinesCenter[0], nearLinesCenter[2]),
+                (nearLinesCenter[1], nearLinesCenter[2]),
                 (0, 255, 0), 1)
+
+        cv2.line(line_image,
+                 (nearLinesTop[0], nearLinesTop[2]),
+                 (nearLinesTop[1], nearLinesTop[2]),
+                 (0, 255, 0), 1)
+
+        cv2.line(line_image,
+                 (nearLinesBotton[0], nearLinesBotton[2]),
+                 (nearLinesBotton[1], nearLinesBotton[2]),
+                 (0, 255, 0), 1)
+
+        nearLineAvarage0 = int((nearLinesCenter[0] + nearLinesTop[0] + nearLinesBotton[0]) / 3)
+        nearLineAvarage1 = int((nearLinesCenter[1] + nearLinesTop[1] + nearLinesBotton[1]) / 3)
+        nearLineAvarage2 = int((nearLinesCenter[2] + nearLinesTop[2] + nearLinesBotton[2]) / 3)
+
+        cv2.line(line_image,
+                 (nearLineAvarage0, nearLineAvarage2),
+                 (nearLineAvarage1, nearLineAvarage2),
+                 (0, 0, 255), 1)
 
         # center
         cv2.line(line_image, (cX1, cY1-10), (cX1, cY1+10), (0, 255, 0), 2)
@@ -114,10 +136,10 @@ def main():
         needToControl = cX1
 
         # center control
-        centerControl = int((nearLines[1] - nearLines[0]) / 2) + nearLines[0]
+        centerControl = int((nearLinesCenter[1] - nearLinesCenter[0]) / 2) + nearLinesCenter[0]
         if (i == 0):
             Xe = centerControl
-        centerControl = [kalman(centerControl), nearLines[2]]
+        centerControl = [kalman(centerControl), nearLinesCenter[2]]
 
         # for control
         etalonValue = centerControl[0]
@@ -138,17 +160,17 @@ def main():
 
 
         error = etalonValue - 250
-	#print("error - ")
-	#print (error)
-        kp = (nearLines[1] - nearLines[0])/2
-	#print("kp - ")
-	#print(kp)
+        #print("error - ")
+        #print (error)
+        kp = (nearLines[1] - nearLinesCenter[0])/2
+        #print("kp - ")
+        #print(kp)
         kp = float(30)/float(kp)
         kp = float(kp) + 0.3
         output = float(kp) * float(error)
         output = output + 95
-	print("output before - ")
-	print(kp)
+        print("output before - ")
+        print(kp)
         if (output > 130):
             output = 130
         if (output < 55):
