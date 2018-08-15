@@ -11,7 +11,7 @@ from picamera import PiCamera
 
 # kalman settings
 varVolt = 10
-varProcess = 3
+varProcess = 5
 Pc = 0.0
 G = 0.0
 P = 1.0
@@ -67,10 +67,10 @@ def main():
 
 
 
-        hsv_min =  np.array([54,118,84])
-        hsv_max = np.array([99,255,255])
+        hsv_min =  np.array([49,88,46])
+        hsv_max = np.array([104,255,91])
         binary_mask = cv2.inRange(hsv_image, hsv_min, hsv_max)
-
+	cv2.imshow("dsd", binary_mask)
         low_threshold = 50
         high_threshold = 150
         edges = cv2.Canny(binary_mask, low_threshold, high_threshold)
@@ -79,8 +79,8 @@ def main():
         rho = 1  # distance resolution in pixels of the Hough grid
         theta = np.pi / 90  # angular resolution in radians of the Hough grid
         threshold = 15  # minimum number of votes (intersections in Hough grid cell)
-        min_line_length = 20  # minimum number of pixels making up a line
-        max_line_gap = 15  # maximum gap in pixels between connectable line segments
+        min_line_length = 50  # minimum number of pixels making up a line
+        max_line_gap = 200  # maximum gap in pixels between connectable line segments
         line_image = np.copy(image) * 0  # creating a blank to draw lines on
         lines = []
         # Run Hough on edge detected image
@@ -99,10 +99,8 @@ def main():
 
         # search the near lines from the center
         nearLinesCenter = getTheNearestLine(arrayLines, cX1, cY1, line_image)
-        nearLinesTop = getTheNearestLine(arrayLines, cX1 - 10, cY1, line_image)
-        nearLinesBotton = getTheNearestLine(arrayLines, cX1 + 10, cY1, line_image)
-
-
+        nearLinesTop = getTheNearestLine(arrayLines, cX1, cY1 - 10, line_image)
+        nearLinesBotton = getTheNearestLine(arrayLines, cX1, cY1+10, line_image)
 
         # draw that lines
         cv2.line(line_image,
@@ -111,21 +109,24 @@ def main():
                 (0, 255, 0), 1)
 
         cv2.line(line_image,
-                 (nearLinesTop[0], nearLinesTop[2]),
-                 (nearLinesTop[1], nearLinesTop[2]),
+                 (nearLinesTop[0], nearLinesTop[2]-10),
+                 (nearLinesTop[1], nearLinesTop[2]-10),
                  (0, 255, 0), 1)
 
         cv2.line(line_image,
-                 (nearLinesBotton[0], nearLinesBotton[2]),
-                 (nearLinesBotton[1], nearLinesBotton[2]),
+                 (nearLinesBotton[0], nearLinesBotton[2]+10),
+                 (nearLinesBotton[1], nearLinesBotton[2]+10),
                  (0, 255, 0), 1)
 
         nearLineAvarage0 = int((nearLinesCenter[0] + nearLinesTop[0] + nearLinesBotton[0]) / 3)
         nearLineAvarage1 = int((nearLinesCenter[1] + nearLinesTop[1] + nearLinesBotton[1]) / 3)
         nearLineAvarage2 = int((nearLinesCenter[2] + nearLinesTop[2] + nearLinesBotton[2]) / 3)
 
-        nearLinesCenter = [nearLineAvarage0, nearLineAvarage1, nearLineAvarage2]
+	
 
+        nearLinesCenter = [nearLineAvarage0,nearLineAvarage1, nearLineAvarage2]
+
+	
         cv2.line(line_image,
                  (nearLineAvarage0, nearLineAvarage2),
                  (nearLineAvarage1, nearLineAvarage2),
@@ -136,7 +137,7 @@ def main():
         cv2.line(line_image, (cX1 - 10, cY1), (cX1 + 10, cY1), (0, 255, 0), 2)
 
         needToControl = cX1
-
+	
         # center control
         centerControl = int((nearLinesCenter[1] - nearLinesCenter[0]) / 2) + nearLinesCenter[0]
         if (i == 0):
@@ -169,37 +170,44 @@ def main():
         #pprint("Etalon value - " + str(etalonValue))
 
         # send to arduino
+	if (nearLinesCenter[0] == 0): 
+            transferToArduino(130) 
+
+        elif (nearLinesCenter[1] == 668): 
+            tranferToArduino(55) 
+	else:
+
+            error = etalonValue - 250
+            
+	    #print("error - ")
+            #print (error)
+	    widthBetweenLines = (nearLinesCenter[1] - nearLinesCenter[0])/2
+            kp = kalman(widthBetweenLines)
+            #print("kp - ")
+            #print(kp)
+            kp = float(75)/float(kp)
+            kp = float(kp) 
+            output = float(kp) * float(error)
+            output = output + 95
+            print("output before KP - ")
+            print(kp)
+            if (output > 130):
+                output = 130
+            if (output < 55):
+                output = 55
+
+            output = (130 - output) + 55
+	    lastError = error
 
 
-        error = etalonValue - 250
-        #print("error - ")
-        #print (error)
-        kp = (nearLinesCenter[1] - nearLinesCenter[0])/2
-        #print("kp - ")
-        #print(kp)
-        kp = float(30)/float(kp)
-        kp = float(kp) + 0.3
-        output = float(kp) * float(error)
-        output = output + 95
-        print("output before - ")
-        print(kp)
-        if (output > 130):
-            output = 130
-        if (output < 55):
-            output = 55
-
-        output = (130 - output) + 55
-
-
-
-        #transferToArduino(int(output))
-        print(output)
+            transferToArduino(int(output))
+            print(output)
 
         cv2.line(imgOriginal, (cX1, cY1 - 10), (cX1, cY1 + 10), (0, 255, 0), 2)
         cv2.line(imgOriginal, (cX1 - 10, cY1), (cX1 + 10, cY1), (0, 255, 0), 2)
 
-        #for item in arrayLines:
-        #    cv2.line(line_image, (item[0], item[1]), (item[2], item[3]), (0, 0, 255), 1)
+        for item in arrayLines:
+            cv2.line(line_image, (item[0], item[1]), (item[2], item[3]), (0, 0, 255), 1)
 
         lines_edges = cv2.addWeighted(imgOriginal, 0.8, line_image, 1, 0)
 
