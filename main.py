@@ -162,7 +162,7 @@ def main():
         error = etalonValue - 250
         #print("error - ")
         #print (error)
-        kp = (nearLines[1] - nearLinesCenter[0])/2
+        kp = (nearLinesCenter[1] - nearLinesCenter[0])/2
         #print("kp - ")
         #print(kp)
         kp = float(30)/float(kp)
