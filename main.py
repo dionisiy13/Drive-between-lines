@@ -124,6 +124,8 @@ def main():
         nearLineAvarage1 = int((nearLinesCenter[1] + nearLinesTop[1] + nearLinesBotton[1]) / 3)
         nearLineAvarage2 = int((nearLinesCenter[2] + nearLinesTop[2] + nearLinesBotton[2]) / 3)
 
+        nearLinesCenter = [nearLineAvarage0, nearLineAvarage1, nearLineAvarage2]
+
         cv2.line(line_image,
                  (nearLineAvarage0, nearLineAvarage2),
                  (nearLineAvarage1, nearLineAvarage2),
@@ -141,6 +143,7 @@ def main():
             Xe = centerControl
         centerControl = [kalman(centerControl), nearLinesCenter[2]]
 
+
         # for control
         etalonValue = centerControl[0]
 
@@ -152,6 +155,15 @@ def main():
                  (centerControl[0] - 10, centerControl[1]),
                  (centerControl[0] + 10, centerControl[1]),
                  (255, 255, 255), 2)
+
+        cv2.line(line_image,
+                 (nearLineAvarage0, nearLineAvarage1 - 10),
+                 (nearLineAvarage0, nearLineAvarage1 + 10),
+                 (255, 255, 255), 2)
+        cv2.line(line_image,
+                 (nearLineAvarage0 - 10, nearLineAvarage1),
+                 (nearLineAvarage0 + 10, nearLineAvarage1),
+                 (0, 0, 0), 2)
 
         #pprint("Need to control - " + str(needToControl))
         #pprint("Etalon value - " + str(etalonValue))
