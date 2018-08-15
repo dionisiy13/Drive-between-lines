@@ -180,14 +180,14 @@ def main():
 
 
 
-        transferToArduino(int(output))
+        #transferToArduino(int(output))
         print(output)
 
         cv2.line(imgOriginal, (cX1, cY1 - 10), (cX1, cY1 + 10), (0, 255, 0), 2)
         cv2.line(imgOriginal, (cX1 - 10, cY1), (cX1 + 10, cY1), (0, 255, 0), 2)
 
-        for item in arrayLines:
-            cv2.line(line_image, (item[0], item[1]), (item[2], item[3]), (0, 0, 255), 1)
+        #for item in arrayLines:
+        #    cv2.line(line_image, (item[0], item[1]), (item[2], item[3]), (0, 0, 255), 1)
 
         lines_edges = cv2.addWeighted(imgOriginal, 0.8, line_image, 1, 0)
 
