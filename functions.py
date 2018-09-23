@@ -50,16 +50,18 @@ def eachPixelOfLine(line,centerY):
                     yield [int(round(xAcc)), y]
 
 
-def getTheNearestLinesNew(image, centerY):
-    width = cv2.GetSize(image)[0]
+def getTheNearestLinesNew(image, centerY, centerX):
+    width = centerX * 2
     left = 0
     right = width
     for x in reversed(range(width/2)):
-        if (img_otsu[centerY, x] == (255.0)):
+        if (image[centerY, x] == (255.0)):
             left = x
+	    break
     for x in range(width/2, width):
-        if (img_otsu[y, x] == (255.0)):
+        if (image[centerY, x] == (255.0)):
             right = x
+            break
     return [left, right, centerY]
 
 def getTheNearestLine(lines, centerX, centerY, img):
@@ -97,6 +99,7 @@ def transferToArduino(number):
         #time.sleep(0.25)
     except IOError:
 	print "Exception \n"
+        time.sleep(0.2)
 
 
 # def transferToArduino(number):

@@ -92,17 +92,17 @@ def main():
 
         # search the near lines from the center
         #nearLines = getTheNearestLine(arrayLines, cX1, cY1, line_image)
-        nearLines = getTheNearestLinesNew(binary_mask, cY1)
+        nearLines = getTheNearestLinesNew(binary_mask, cY1, cX1)
 
         # draw that lines
-        cv2.line(line_image,
+        cv2.line(imgOriginal,
                  (nearLines[0], nearLines[2]),
                 (nearLines[1], nearLines[2]),
                 (0, 255, 0), 1)
 
         # center
-        cv2.line(line_image, (cX1, cY1-10), (cX1, cY1+10), (0, 255, 0), 2)
-        cv2.line(line_image, (cX1 - 10, cY1), (cX1 + 10, cY1), (0, 255, 0), 2)
+        cv2.line(imgOriginal, (cX1, cY1-10), (cX1, cY1+10), (0, 255, 0), 2)
+        cv2.line(imgOriginal, (cX1 - 10, cY1), (cX1 + 10, cY1), (0, 255, 0), 2)
 
         needToControl = cX1
 
@@ -115,11 +115,11 @@ def main():
         # for control
         etalonValue = centerControl[0]
 
-        cv2.line(line_image,
+        cv2.line(imgOriginal,
                  (centerControl[0], centerControl[1] - 10),
                  (centerControl[0],centerControl[1] + 10),
                  (255, 255, 255), 2)
-        cv2.line(line_image,
+        cv2.line(imgOriginal,
                  (centerControl[0] - 10, centerControl[1]),
                  (centerControl[0] + 10, centerControl[1]),
                  (255, 255, 255), 2)
@@ -129,10 +129,10 @@ def main():
 
         # send to arduino
 
-	    coefficient = 1.3
+	coefficient = 1.8
         error = etalonValue - cX1
         kp = (nearLines[1] - nearLines[0])/2
-	    if kp == 0:
+	if kp == 0:
             kp = 70
         kp = float(75)/float(kp)
         kp = float(kp) 
@@ -151,15 +151,15 @@ def main():
         cv2.line(imgOriginal, (cX1, cY1 - 10), (cX1, cY1 + 10), (0, 255, 0), 2)
         cv2.line(imgOriginal, (cX1 - 10, cY1), (cX1 + 10, cY1), (0, 255, 0), 2)
 
-        for item in arrayLines:
-            cv2.line(line_image, (item[0], item[1]), (item[2], item[3]), (0, 0, 255), 1)
+        #for item in arrayLines:
+        #    cv2.line(line_image, (item[0], item[1]), (item[2], item[3]), (0, 0, 255), 1)
 
-        lines_edges = cv2.addWeighted(imgOriginal, 0.8, line_image, 1, 0)
-
+        #lines_edges = cv2.addWeighted(imgOriginal, 0.8, line_image, 1, 0)
+        cv2.imshow("binary", binary_mask)
 
         cv2.imshow("original", imgOriginal)
 
-        cv2.imshow("lines", line_image)
+        #cv2.imshow("lines", line_image)
 
         #rawCapture.truncate()
         #rawCapture.seek(0)
