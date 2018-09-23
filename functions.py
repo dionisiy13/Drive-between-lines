@@ -1,5 +1,5 @@
+import cv2
 import time
-import serial
 import smbus2 as smbus
 from pprint import pprint
 from smbus2 import SMBusWrapper
@@ -50,7 +50,17 @@ def eachPixelOfLine(line,centerY):
                     yield [int(round(xAcc)), y]
 
 
-
+def getTheNearestLinesNew(image, centerY):
+    width = cv2.GetSize(image)[0]
+    left = 0
+    right = width
+    for x in reversed(range(width/2)):
+        if (img_otsu[centerY, x] == (255.0)):
+            left = x
+    for x in range(width/2, width):
+        if (img_otsu[y, x] == (255.0)):
+            right = x
+    return [left, right, centerY]
 
 def getTheNearestLine(lines, centerX, centerY, img):
 
