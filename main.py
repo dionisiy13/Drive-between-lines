@@ -2,6 +2,7 @@ import cv2
 import numpy as np
 import os
 import time
+from car import *
 from functions import *
 from imutils.video.pivideostream import PiVideoStream
 import imutils
@@ -145,7 +146,9 @@ def main():
 
         output = (130 - output) + 55
 
-        transferToArduino(int(output))
+        car = Car()
+        car.changeAngle(output)
+
         print(output)
 
         cv2.line(imgOriginal, (cX1, cY1 - 10), (cX1, cY1 + 10), (0, 255, 0), 2)
