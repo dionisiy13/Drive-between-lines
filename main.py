@@ -3,172 +3,111 @@ import numpy as np
 import os
 import time
 from car import *
-from functions import *
+from TransferToArduino import *
 from imutils.video.pivideostream import PiVideoStream
 import imutils
 from pprint import pprint
 from picamera.array import PiRGBArray
 from picamera import PiCamera
+from DetectCenter import DetectCenter
+from ProcessFrame import ProcessFrame
+from ProportionalGain import ProportionalGain
+from TransferToArduino import TransferToArduino
+from Kalman import Kalman
 
-# kalman settings
-varVolt = 6
-varProcess = 3
-Pc = 0.0
-G = 0.0
-P = 1.0
-Xp = 0.0
-Zp = 0.0
-Xe = 0
-
-def kalman(val):
-    global P
-    global varProcess
-    global Xe
-    global Xp
-    global Zp
-    global G
-    global Pc
-    global varVolt
-    Pc = P + varProcess
-    G = Pc/(Pc + varVolt)
-    P = (1 - G)*Pc
-    Xp = Xe
-    Zp = Xp
-    Xe = G*(val-Zp)+Xp
-    return int(Xe)
 
 def main():
-    global Xe
 
     print("init..")
     i = 0
-
     print("camera init..")
     camera = PiVideoStream().start()
     time.sleep(4.0)
-    motor = 55
     print("start!")
-   
 
-
-    #for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=True):
     while 1:
-
         imgOriginal = camera.read()
+
+        process_frame = ProcessFrame()
+
         image = imgOriginal
         (h1, w1) = image.shape[:2]
         (cX1, cY1) = (w1 // 2, h1 // 2)
 
-        hsv_image = cv2.cvtColor(imgOriginal, cv2.COLOR_BGR2HSV)
+        process_frame.set_top_border_color(np.array([76, 255, 112]))
+        process_frame.set_bottom_border_color(np.array([47, 116, 33]))
+        hsv_image = process_frame.apply_hsv_color(imgOriginal)
+        binary_mask = process_frame.binaryzation(hsv_frame=hsv_image)
+        near_lines = DetectCenter.get_the_nearest_lines_new(binary_mask, cY1, cX1)
 
-        hsv_min =  np.array([47,116,33])
-        hsv_max = np.array([76,255,112])
-        binary_mask = cv2.inRange(hsv_image, hsv_min, hsv_max)
-
-        low_threshold = 50
-        high_threshold = 150
-        #edges = cv2.Canny(binary_mask, low_threshold, high_threshold)
-
-        #rho = 1  # distance resolution in pixels of the Hough grid
-        #theta = np.pi / 180  # angular resolution in radians of the Hough grid
-        #threshold = 15  # minimum number of votes (intersections in Hough grid cell)
-        #min_line_length = 40  # minimum number of pixels making up a line
-        #max_line_gap = 40  # maximum gap in pixels between connectable line segments
-        #line_image = np.copy(image) * 0  # creating a blank to draw lines on
-        lines = []
-        # Run Hough on edge detected image
-        # Output "lines" is an array containing endpoints of detected line segments
-        #lines = cv2.HoughLinesP(binary_mask, rho, theta, threshold, np.array([]),min_line_length, max_line_gap)
-
-        #if lines is None:
-        #    print("Fuck, sorry my lord, but I did not found any line( But I am trying........")
-        #    continue
-
-        #arrayLines = []
-        #for line in lines:
-	    #x1, y1, x2, y2 = line[0]
-            #for x1, y1, x2, y2 in line:
-        #    arrayLines.append([x1,y1,x2,y2])
-
-
-        # search the near lines from the center
-        #nearLines = getTheNearestLine(arrayLines, cX1, cY1, line_image)
-        nearLines = getTheNearestLinesNew(binary_mask, cY1, cX1)
+        left_line = near_lines[0]
+        right_line = near_lines[1]
 
         # draw that lines
         cv2.line(imgOriginal,
-                 (nearLines[0], nearLines[2]),
-                (nearLines[1], nearLines[2]),
+                (left_line, cY1),
+                (right_line, cY1),
                 (0, 255, 0), 1)
 
-        # center
+        # draw the center
         cv2.line(imgOriginal, (cX1, cY1-10), (cX1, cY1+10), (0, 255, 0), 2)
         cv2.line(imgOriginal, (cX1 - 10, cY1), (cX1 + 10, cY1), (0, 255, 0), 2)
 
-        needToControl = cX1
+        # calculated center
+        center_control = int((right_line - left_line) / 2) + left_line
 
-        # center control
-        centerControl = int((nearLines[1] - nearLines[0]) / 2) + nearLines[0]
-        if (i == 0):
-            Xe = centerControl
-        centerControl = [kalman(centerControl), nearLines[2]]
+        if i == 0:
+            Xe = center_control
+
+        # apply kalman`s filter
+        kalman = Kalman()
+        center_control = kalman.kalman(center_control)
 
         # for control
-        etalonValue = centerControl[0]
+        etalon_value = center_control
 
+        # draw calculated center
         cv2.line(imgOriginal,
-                 (centerControl[0], centerControl[1] - 10),
-                 (centerControl[0],centerControl[1] + 10),
+                 (center_control, cY1 - 10),
+                 (center_control, cY1 + 10),
                  (255, 255, 255), 2)
         cv2.line(imgOriginal,
-                 (centerControl[0] - 10, centerControl[1]),
-                 (centerControl[0] + 10, centerControl[1]),
+                 (center_control - 10, cY1),
+                 (center_control + 10, cY1),
                  (255, 255, 255), 2)
 
-        #pprint("Need to control - " + str(needToControl))
-        #pprint("Etalon value - " + str(etalonValue))
+        output = ProportionalGain.calculate(1.8, etalon_value, cX1, right_line - left_line)
+        error = etalon_value - cX1
 
-        # send to arduino
+        arduino_transfer = TransferToArduino()
+        if output is False:
+            # stop the car
+            arduino_transfer.say(1)
+        else:
+            # keep moving
+            arduino_transfer.say(output)
 
-	coefficient = 1.8
-        error = etalonValue - cX1
-        kp = (nearLines[1] - nearLines[0])/2
-	if kp == 0:
-            kp = 70
-        kp = float(75)/float(kp)
-        kp = float(kp) 
-        output = (float(coefficient) * float(kp)) * float(error)
-        output = output + 92
-        if (output > 130):
-            output = 130
-        if (output < 55):
-            output = 55
+        error = abs(error)
 
-        output = (130 - output) + 55
+        if error > 0 and error < 10:
+            color = (0, 255, 0)
+        if error >= 10 and error <= 40:
+            color = (0, 213, 255)
+        if error > 40:
+            color = (0, 0, 255)
 
-        car = Car()
-        car.changeAngle(output)
+        if output < 92:
+            cv2.arrowedLine(image, (cX1-30, cY1-30), (cX1+30, cY1 - 30), color, 3)
+        if output > 92:
+            cv2.arrowedLine(image, (cX1+30, cY1-30), (cX1-30, cY1-30), color, 3)
+        cv2.line(image, (cX1, cY1-10), (cX1, cY1+10), (0, 255, 0), 2)
+        cv2.line(image, (cX1-10, cY1), (cX1+10, cY1), (0, 255, 0), 2)
 
-        print(output)
-
-        cv2.line(imgOriginal, (cX1, cY1 - 10), (cX1, cY1 + 10), (0, 255, 0), 2)
-        cv2.line(imgOriginal, (cX1 - 10, cY1), (cX1 + 10, cY1), (0, 255, 0), 2)
-
-        #for item in arrayLines:
-        #    cv2.line(line_image, (item[0], item[1]), (item[2], item[3]), (0, 0, 255), 1)
-
-        #lines_edges = cv2.addWeighted(imgOriginal, 0.8, line_image, 1, 0)
+        # show frames
         cv2.imshow("binary", binary_mask)
+        cv2.imshow("original", image)
 
-        cv2.imshow("original", imgOriginal)
-
-        #cv2.imshow("lines", line_image)
-
-        #rawCapture.truncate()
-        #rawCapture.seek(0)
-
-        i = 1
-
+        i = i + 1
 
         if cv2.waitKey(1) & 0xFF == ord('q'):
             break
