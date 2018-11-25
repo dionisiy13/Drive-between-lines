@@ -54,11 +54,20 @@ def getTheNearestLinesNew(image, centerY, centerX):
     width = centerX * 2
     left = 0
     right = width
+    #print(centerY)
+    i = 0
     for x in reversed(range(width/2)):
-        if (image[centerY, x] == (255.0)):
+        if (i==0):
+	    i = 1
+	    continue
+	if (image[centerY, x] == (255.0)):
             left = x
+	    #print(x)
 	    break
     for x in range(width/2, width):
+        if (i==1):
+	    i = 2
+	    continue
         if (image[centerY, x] == (255.0)):
             right = x
             break

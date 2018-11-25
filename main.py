@@ -1,8 +1,8 @@
+#from car import Car
 import cv2
 import numpy as np
 import os
 import time
-from car import *
 from functions import *
 from imutils.video.pivideostream import PiVideoStream
 import imutils
@@ -11,8 +11,8 @@ from picamera.array import PiRGBArray
 from picamera import PiCamera
 
 # kalman settings
-varVolt = 6
-varProcess = 3
+varVolt = 20
+varProcess = 30
 Pc = 0.0
 G = 0.0
 P = 1.0
@@ -40,6 +40,7 @@ def kalman(val):
 def main():
     global Xe
 
+    #car = Car()
     print("init..")
     i = 0
 
@@ -55,14 +56,14 @@ def main():
     while 1:
 
         imgOriginal = camera.read()
-        image = imgOriginal
+        image = imgOriginal.copy()
         (h1, w1) = image.shape[:2]
         (cX1, cY1) = (w1 // 2, h1 // 2)
 
         hsv_image = cv2.cvtColor(imgOriginal, cv2.COLOR_BGR2HSV)
 
-        hsv_min =  np.array([47,116,33])
-        hsv_max = np.array([76,255,112])
+        hsv_min =  np.array([59,31,19])
+        hsv_max = np.array([78,255,111])
         binary_mask = cv2.inRange(hsv_image, hsv_min, hsv_max)
 
         low_threshold = 50
@@ -75,7 +76,7 @@ def main():
         #min_line_length = 40  # minimum number of pixels making up a line
         #max_line_gap = 40  # maximum gap in pixels between connectable line segments
         #line_image = np.copy(image) * 0  # creating a blank to draw lines on
-        lines = []
+        #lines = []
         # Run Hough on edge detected image
         # Output "lines" is an array containing endpoints of detected line segments
         #lines = cv2.HoughLinesP(binary_mask, rho, theta, threshold, np.array([]),min_line_length, max_line_gap)
@@ -86,24 +87,24 @@ def main():
 
         #arrayLines = []
         #for line in lines:
-	    #x1, y1, x2, y2 = line[0]
-            #for x1, y1, x2, y2 in line:
-        #    arrayLines.append([x1,y1,x2,y2])
+	#    x1, y1, x2, y2 = line[0]
+        #    for x1, y1, x2, y2 in line:
+        #        arrayLines.append([x1,y1,x2,y2])
 
 
         # search the near lines from the center
         #nearLines = getTheNearestLine(arrayLines, cX1, cY1, line_image)
         nearLines = getTheNearestLinesNew(binary_mask, cY1, cX1)
-
+	pprint(nearLines)
         # draw that lines
-        cv2.line(imgOriginal,
+        cv2.line(image,
                  (nearLines[0], nearLines[2]),
-                (nearLines[1], nearLines[2]),
-                (0, 255, 0), 1)
+                 (nearLines[1], nearLines[2]),
+                 (0, 255, 0), 1)
 
         # center
-        cv2.line(imgOriginal, (cX1, cY1-10), (cX1, cY1+10), (0, 255, 0), 2)
-        cv2.line(imgOriginal, (cX1 - 10, cY1), (cX1 + 10, cY1), (0, 255, 0), 2)
+        cv2.line(image, (cX1, cY1-10), (cX1, cY1+10), (0, 255, 0), 2)
+        cv2.line(image, (cX1 - 10, cY1), (cX1 + 10, cY1), (0, 255, 0), 2)
 
         needToControl = cX1
 
@@ -116,21 +117,23 @@ def main():
         # for control
         etalonValue = centerControl[0]
 
-        cv2.line(imgOriginal,
+        cv2.line(image,
                  (centerControl[0], centerControl[1] - 10),
                  (centerControl[0],centerControl[1] + 10),
                  (255, 255, 255), 2)
-        cv2.line(imgOriginal,
+        cv2.line(image,
                  (centerControl[0] - 10, centerControl[1]),
                  (centerControl[0] + 10, centerControl[1]),
                  (255, 255, 255), 2)
+
+
 
         #pprint("Need to control - " + str(needToControl))
         #pprint("Etalon value - " + str(etalonValue))
 
         # send to arduino
 
-	coefficient = 1.8
+	coefficient = 0.7
         error = etalonValue - cX1
         kp = (nearLines[1] - nearLines[0])/2
 	if kp == 0:
@@ -143,16 +146,30 @@ def main():
             output = 130
         if (output < 55):
             output = 55
-
+	
         output = (130 - output) + 55
+	
+	print("Error is -" + str(error))
+	print("Servo control - " + str(output))
+	transferToArduino(int(output))
+        #car.changeAngle(int(output))
+        color = (255, 255, 255)
+        #print(etalonValue)
+	error = abs(error)
+	if (error > 0 and error < 10):
+	     color = (0, 255, 0)
+	if (error >= 10 and error <= 40):
+	     color = (0, 213, 255)
+	if (error > 40):
+	     color = (0, 0, 255)
 
-        car = Car()
-        car.changeAngle(output)
+	if (output < 92):
+	    cv2.arrowedLine(image, (cX1-30, cY1-30), (cX1+30,cY1 - 30), color, 3)
+	if (output > 92):
+	    cv2.arrowedLine(image, (cX1+30, cY1-30), (cX1-30, cY1-30), color, 3)
 
-        print(output)
-
-        cv2.line(imgOriginal, (cX1, cY1 - 10), (cX1, cY1 + 10), (0, 255, 0), 2)
-        cv2.line(imgOriginal, (cX1 - 10, cY1), (cX1 + 10, cY1), (0, 255, 0), 2)
+        cv2.line(image, (cX1, cY1 - 10), (cX1, cY1 + 10), (0, 255, 0), 2)
+        cv2.line(image, (cX1 - 10, cY1), (cX1 + 10, cY1), (0, 255, 0), 2)
 
         #for item in arrayLines:
         #    cv2.line(line_image, (item[0], item[1]), (item[2], item[3]), (0, 0, 255), 1)
@@ -160,7 +177,7 @@ def main():
         #lines_edges = cv2.addWeighted(imgOriginal, 0.8, line_image, 1, 0)
         cv2.imshow("binary", binary_mask)
 
-        cv2.imshow("original", imgOriginal)
+        cv2.imshow("original", image)
 
         #cv2.imshow("lines", line_image)
 
