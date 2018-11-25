@@ -23,7 +23,7 @@ def main():
     camera = PiVideoStream().start()
     time.sleep(4.0)
     print("start!")
-    Kalman = Kalman()
+    kalman = Kalman()
 
     while 1:
         imgOriginal = camera.read()
@@ -38,22 +38,18 @@ def main():
         process_frame.set_bottom_border_color([42, 70, 14])
         hsv_image = process_frame.apply_hsv_color(imgOriginal)
 
-
         binary_mask = process_frame.binaryzation(hsv_image)
         near_lines = DetectCenter.get_the_nearest_lines_new(binary_mask, cY1, cX1)
 	pprint(near_lines)
         left_line = near_lines[0]
         right_line = near_lines[1]
 
-
-
         # draw that lines
         cv2.line(image,
                 (left_line, cY1),
                 (right_line, cY1),
                 (0, 255, 0), 1)
-		
-	        
+			        
 	# draw the center
         cv2.line(image, (cX1, cY1-10), (cX1, cY1+10), (0, 255, 0), 2)
         cv2.line(image, (cX1 - 10, cY1), (cX1 + 10, cY1), (0, 255, 0), 2)
@@ -62,12 +58,11 @@ def main():
         center_control = int((right_line - left_line) / 2) + left_line
 
         if i == 0:
-            Kalman.Xe = center_control
+            kalman.Xe = center_control
 
         # apply kalman`s filter
-        center_control = Kalman.kalman(center_control)
-	print(center_control)
-	print("\n")
+        center_control = kalman.kalman(center_control)
+
         # for control
         etalon_value = center_control
 
@@ -81,9 +76,11 @@ def main():
                  (center_control + 10, cY1),
                  (255, 255, 255), 2)
 
-        output = ProportionalGain.calculate(1.8, etalon_value, cX1, right_line - left_line)
+        output = ProportionalGain.calculate(0.92, etalon_value, cX1, right_line - left_line)
         error = etalon_value - cX1
-
+	print("Output - ")
+	print(output)
+	print(center_control)
         arduino_transfer = TransferToArduino()
         if output is False:
 	    a = 1
@@ -92,7 +89,7 @@ def main():
         else:
             # keep moving
 	    a = 2
-            #arduino_transfer.say(int(output))
+            arduino_transfer.say(int(output))
 
         error = abs(error)
 
