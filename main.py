@@ -13,6 +13,7 @@ from ProcessFrame import ProcessFrame
 from ProportionalGain import ProportionalGain
 from TransferToArduino import TransferToArduino
 from Kalman import Kalman
+from PID import PID
 
 
 def main():
@@ -24,6 +25,7 @@ def main():
     time.sleep(4.0)
     print("start!")
     kalman = Kalman()
+    pid = PID(0.95, .1, 1.5, Integrator_min=-100)
 
     while 1:
         imgOriginal = camera.read()
@@ -78,9 +80,9 @@ def main():
 
         output = ProportionalGain.calculate(0.92, etalon_value, cX1, right_line - left_line)
         error = etalon_value - cX1
-	print("Output - ")
-	print(output)
-	print(center_control)
+        print("PROPORTIONAL - "+str(output))
+        print("PID - " + str(pid.update()))
+
         arduino_transfer = TransferToArduino()
         if output is False:
 	    a = 1
