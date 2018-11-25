@@ -2,7 +2,6 @@ import cv2
 import numpy as np
 import os
 import time
-from car import *
 from TransferToArduino import *
 from imutils.video.pivideostream import PiVideoStream
 import imutils
@@ -24,54 +23,60 @@ def main():
     camera = PiVideoStream().start()
     time.sleep(4.0)
     print("start!")
+    Kalman = Kalman()
 
     while 1:
         imgOriginal = camera.read()
 
         process_frame = ProcessFrame()
 
-        image = imgOriginal
+        image = imgOriginal.copy()
         (h1, w1) = image.shape[:2]
         (cX1, cY1) = (w1 // 2, h1 // 2)
 
-        process_frame.set_top_border_color(np.array([76, 255, 112]))
-        process_frame.set_bottom_border_color(np.array([47, 116, 33]))
+        process_frame.set_top_border_color([62, 255, 77])
+        process_frame.set_bottom_border_color([42, 70, 14])
         hsv_image = process_frame.apply_hsv_color(imgOriginal)
-        binary_mask = process_frame.binaryzation(hsv_frame=hsv_image)
-        near_lines = DetectCenter.get_the_nearest_lines_new(binary_mask, cY1, cX1)
 
+
+        binary_mask = process_frame.binaryzation(hsv_image)
+        near_lines = DetectCenter.get_the_nearest_lines_new(binary_mask, cY1, cX1)
+	pprint(near_lines)
         left_line = near_lines[0]
         right_line = near_lines[1]
 
+
+
         # draw that lines
-        cv2.line(imgOriginal,
+        cv2.line(image,
                 (left_line, cY1),
                 (right_line, cY1),
                 (0, 255, 0), 1)
-
-        # draw the center
-        cv2.line(imgOriginal, (cX1, cY1-10), (cX1, cY1+10), (0, 255, 0), 2)
-        cv2.line(imgOriginal, (cX1 - 10, cY1), (cX1 + 10, cY1), (0, 255, 0), 2)
+		
+	        
+	# draw the center
+        cv2.line(image, (cX1, cY1-10), (cX1, cY1+10), (0, 255, 0), 2)
+        cv2.line(image, (cX1 - 10, cY1), (cX1 + 10, cY1), (0, 255, 0), 2)
 
         # calculated center
         center_control = int((right_line - left_line) / 2) + left_line
 
         if i == 0:
-            Xe = center_control
+            Kalman.Xe = center_control
 
         # apply kalman`s filter
-        kalman = Kalman()
-        center_control = kalman.kalman(center_control)
-
+        center_control = Kalman.kalman(center_control)
+	print(center_control)
+	print("\n")
         # for control
         etalon_value = center_control
 
         # draw calculated center
-        cv2.line(imgOriginal,
+        cv2.line(image,
                  (center_control, cY1 - 10),
                  (center_control, cY1 + 10),
                  (255, 255, 255), 2)
-        cv2.line(imgOriginal,
+        cv2.line(image,
                  (center_control - 10, cY1),
                  (center_control + 10, cY1),
                  (255, 255, 255), 2)
@@ -81,11 +86,13 @@ def main():
 
         arduino_transfer = TransferToArduino()
         if output is False:
+	    a = 1
             # stop the car
-            arduino_transfer.say(1)
+            #arduino_transfer.say(1)
         else:
             # keep moving
-            arduino_transfer.say(output)
+	    a = 2
+            #arduino_transfer.say(int(output))
 
         error = abs(error)
 
@@ -108,9 +115,10 @@ def main():
         cv2.imshow("original", image)
 
         i = i + 1
-
+	
         if cv2.waitKey(1) & 0xFF == ord('q'):
             break
+           
     camera.stop()
     return
 

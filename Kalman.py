@@ -18,4 +18,4 @@ class Kalman:
         self.Xp = self.Xe
         self.Zp = self.Xp
         self.Xe = self.G * (val - self.Zp) + self.Xp
-        return int(self. Xe)
+        return int(self.Xe)
